@@ -18,10 +18,13 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: 18
+        node-version: 20
+
+    - name: Install pnpm
+      run: npm install pnpm
 
     - name: Install dependencies
-      run: npm install pnpm && pnpm update
+      run: pnpm update
 
     - name: Build Tauri App
       run: pnpm run build && pnpm run tauri -- build
