@@ -21,10 +21,10 @@ jobs:
         node-version: 16
 
     - name: Install dependencies
-      run: npm update
+      run: npm install pnpm && pnpm update
 
     - name: Build Tauri App
-      run: npm run build && npm run tauri -- build
+      run: pnpm run build && pnpm run tauri -- build
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v2
