@@ -43,17 +43,16 @@ jobs:
     - name: List MSI files
       id: list_files
       run: |
-        # 使用 find 命令列出所有需要上传的 .msi 文件，并将结果保存到环境变量中
-        echo "::set-env name=MSI_FILES::$(find ./src-tauri/target/release/bundle/msi -name '*.msi')"
+        # 使用 find 命令列出所有需要上传的 .msi 文件，并将结果保存到环境变量文件中
+        files=$(find ./src-tauri/target/release/bundle/msi -name '*.msi')
+        echo "MSI_FILES=$files" >> $GITHUB_ENV
 
-
-    - name: Upload Release Asset
-      id: upload-release-asset 
-      uses: actions/upload-release-asset@v1
+    - name: Upload MSI files on Windows
+      if: runner.os == 'Windows'
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_name: ${{ env.MSI_FILES }}
-        asset_path: alive_mouse_${{ github.ref_name  }}.msi
-        asset_content_type: application/x-msi
+      run: |
+        for file in ${{ env.MSI_FILES }}; do
+          echo "Uploading $file"
+          gh release upload ${{ steps.create_release.outputs.upload_url }} "$file" --clobber
+        done
