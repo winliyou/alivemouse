@@ -13,7 +13,7 @@ jobs:
         os: [windows-latest]
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
 
     - name: Setup Node.js
       uses: actions/setup-node@v4
@@ -32,8 +32,7 @@ jobs:
     - name: Upload Artifact
       uses: actions/upload-artifact@v2
       with:
-        name: tauri-app-${{ matrix.os }}
-        path: ./src-tauri/target/release/
+        path: ./src-tauri/target/release/bundle/msi/*.exe
 
     - name: Create Release
       id: create_release
@@ -53,6 +52,5 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./src-tauri/target/release/
-        asset_name: tauri-app-${{ matrix.os }}.zip
-        asset_content_type: application/zip
+        asset_path: ./src-tauri/target/release/bundle/msi/*.exe
+        asset_content_type: application/vnd.microsoft.portable-executable
