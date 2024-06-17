@@ -21,7 +21,7 @@ jobs:
         node-version: 16
 
     - name: Install dependencies
-      run: npm ci
+      run: npm update
 
     - name: Build Tauri App
       run: npm run build && npm run tauri -- build
