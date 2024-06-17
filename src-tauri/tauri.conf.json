@@ -5,9 +5,6 @@
     "devPath": "http://localhost:1420",
     "distDir": "../dist"
   },
-  "package": {
-    "productName": "tauri-demo"
-  },
   "tauri": {
     "systemTray": {
       "iconPath": "icons/32x32.png"
@@ -17,7 +14,7 @@
     },
     "windows": [
       {
-        "title": "tauri-demo",
+        "title": "alive_mouse",
         "width": 400,
         "height": 300,
         "label": "main",

@@ -1,5 +1,5 @@
 [package]
-name = "tauri-demo"
+name = "alive_mouse"
 version = "0.0.9"
 description = "A Tauri App"
 authors = ["you"]
