@@ -52,5 +52,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_name: alivemouse_${{ github.ref_name  }}.msi
         asset_path: ./src-tauri/target/release/bundle/msi/*.msi
         asset_content_type: application/x-msi
