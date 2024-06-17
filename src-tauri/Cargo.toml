@@ -1,11 +1,15 @@
 [package]
 name = "tauri-demo"
-version = "0.0.8"
+version = "0.0.9"
 description = "A Tauri App"
 authors = ["you"]
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[[bin]]
+name = "alive_mouse"
+path = "src/main.rs"
 
 [build-dependencies]
 tauri-build = { version = "1", features = [] }
