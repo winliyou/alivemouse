@@ -40,19 +40,13 @@ jobs:
         draft: false
         prerelease: false
 
-    - name: List MSI files
-      id: list_files
-      run: |
-        # 使用 find 命令列出所有需要上传的 .msi 文件，并将结果保存到环境变量文件中
-        files=$(find ./src-tauri/target/release/bundle/msi -name '*.msi')
-        echo "MSI_FILES=$files" >> $GITHUB_ENV
-
     - name: Upload MSI files on Windows
       if: runner.os == 'Windows'
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        for file in ${{ env.MSI_FILES }}; do
-          echo "Uploading $file"
-          gh release upload ${{ steps.create_release.outputs.upload_url }} "$file" --clobber
-        done
+        $files = Get-ChildItem -Path ./src-tauri/target/release/bundle/msi -Filter *.msi -Recurse | ForEach-Object { $_.FullName }
+        foreach ($file in $files) {
+            echo "Uploading $file"
+            gh release upload ${{ github.ref_name }} "$file" --clobber
+        }
