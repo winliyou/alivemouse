@@ -1,18 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import { useState } from 'react';
+import React from 'react';
 import { invoke } from '@tauri-apps/api/tauri';
-import { listen } from '@tauri-apps/api/event';
-import { appWindow } from '@tauri-apps/api/window';
 
 const App = () => {
-  useEffect(() => {
-    // 监听窗口最小化事件
-    listen('tauri://minimize', () => {
-      invoke('hide_to_tray');
-    });
 
-    // 显示窗口（当应用程序准备好时）
-    appWindow.hide();
-  }, []);
   const [interval, setInterval] = useState(10);
 
   const handleSubmit = (event: React.FormEvent) => {
