@@ -163,7 +163,6 @@ fn handle_global_shortcut_find_mouse(_app_handle: &AppHandle) {
     info!("find mouse triggered");
     let enigo = Enigo::new(&Settings::default()).unwrap();
     let window = _app_handle.get_window("mouse_position").unwrap();
-    window.show().unwrap();
     let mouse_position = enigo.location().unwrap();
     info!("mouse position: {:?}", mouse_position);
     let monitors = window.available_monitors().unwrap();
@@ -195,6 +194,9 @@ fn handle_global_shortcut_find_mouse(_app_handle: &AppHandle) {
         })
         .unwrap();
     info!("window current monitor: {:?}", window.current_monitor());
+    if !window.is_visible().unwrap() {
+        window.show().unwrap();
+    }
     window.emit("find_mouse", {}).unwrap();
 }
 

@@ -102,30 +102,31 @@ a {
   z-index: 100;
 }
 
+
 .circle {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 60px;
-  height: 60px;
-  min-width: 60px;
-  min-height: 60px;
-  border-radius: 50%;
+  width: 120px;
+  height: 120px;
+  border: solid 1px #000;
   background: #000;
+  border-radius: 100%;
   transform: translate(-50%, -50%);
-  z-index: 1000;
-  /* animation: scale-up 0.5s infinite; */
+  animation: scale-up 0.16s infinite;
+  animation-timing-function: cubic-bezier(0.5, 0, 0, 1);
 }
 
 @keyframes scale-up {
   0% {
-    transform: translate(-50%, -50%) scale(1);
-    border-width: 5px;
+    transform: translate(-50%, -50%) scale(0.1);
+  }
+
+  80% {
+    transform: translate(-50%, -50%) scale(2);
   }
 
   100% {
-    transform: translate(-50%, -50%) scale(12);
-    /* 60px / 5px = 12 */
-    border-width: 0;
+    transform: translate(-50%, -50%) scale(0.1);
   }
 }

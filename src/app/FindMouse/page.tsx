@@ -1,5 +1,6 @@
 'use client';
 import "../globals.css";
+import "./FindMouse.module.css"
 import { listen } from "@tauri-apps/api/event";
 import { useEffect, useState } from "react"
 export default () => {
@@ -20,6 +21,13 @@ export default () => {
     }, [])
     return (
         <>
+            <style jsx global>{`
+        body {
+          background-color: transparent;
+          /* Specific body styles for FindMouse page */
+          /* You can add more styles here as needed */
+        }
+      `}</style>
             <div className="circle"></div>
         </>
     );
