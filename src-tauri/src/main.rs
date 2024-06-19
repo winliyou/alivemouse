@@ -93,8 +93,6 @@ fn handle_tray_event(app: &AppHandle<impl Runtime>, event: SystemTrayEvent) {
                 }
                 window.show().unwrap();
             }
-            let tray_handle = app.tray_handle();
-            tray_handle.set_menu(SystemTrayMenu::new()).unwrap();
         }
         SystemTrayEvent::MenuItemClick { id, .. } => match id.as_str() {
             "Quit" => {
