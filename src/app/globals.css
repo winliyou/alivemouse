@@ -114,4 +114,18 @@ a {
   background: #000;
   transform: translate(-50%, -50%);
   z-index: 1000;
+  /* animation: scale-up 0.5s infinite; */
+}
+
+@keyframes scale-up {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    border-width: 5px;
+  }
+
+  100% {
+    transform: translate(-50%, -50%) scale(12);
+    /* 60px / 5px = 12 */
+    border-width: 0;
+  }
 }
