@@ -52,7 +52,7 @@
       "targets": [
         "dmg",
         "nsis",
-        "appimage"
+        "deb"
       ],
       "identifier": "com.lsyb.livemouse",
       "icon": [
