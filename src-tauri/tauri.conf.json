@@ -2,7 +2,7 @@
   "build": {
     "beforeDevCommand": "pnpm dev",
     "beforeBuildCommand": "pnpm build",
-    "devPath": "http://localhost:1420",
+    "devPath": "http://localhost:3000",
     "distDir": "../dist"
   },
   "package": {
@@ -11,7 +11,8 @@
   },
   "tauri": {
     "systemTray": {
-      "iconPath": "icons/32x32.png"
+      "iconPath": "icons/32x32.png",
+      "title": "alive_mouse"
     },
     "allowlist": {
       "all": true
@@ -19,21 +20,35 @@
     "windows": [
       {
         "title": "alive_mouse",
+        "label": "main",
         "width": 400,
         "height": 300,
-        "label": "main",
-        "url": "index.html",
+        "url": "/",
         "minimizable": true,
         "visible": false,
-        "resizable": false
+        "resizable": false,
+        "alwaysOnTop": true
+      },
+      {
+        "title": "i'm here!",
+        "label": "mouse_position",
+        "url": "/FindMouse",
+        "width": 120,
+        "height": 120,
+        "visible": false,
+        "resizable": false,
+        "decorations": false,
+        "transparent": true,
+        "alwaysOnTop": true
       }
     ],
     "security": {
       "csp": null
     },
+    "macOSPrivateApi": true,
     "bundle": {
       "active": true,
-      "targets":"all",
+      "targets": "all",
       "identifier": "com.lsyb.livemouse",
       "icon": [
         "icons/32x32.png",
