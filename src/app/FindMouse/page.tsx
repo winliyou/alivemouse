@@ -7,6 +7,9 @@ export default () => {
     const [currentTimeout, setCurrentTimeout] = useState<any>(null);
     useEffect(() => {
         listen("find_mouse", (event) => {
+            if (currentTimeout) {
+                clearTimeout(currentTimeout);
+            }
             setCurrentTimeout(setTimeout(async () => {
                 const window = await import("@tauri-apps/api/window");
                 window.getCurrent().hide().then(() => {

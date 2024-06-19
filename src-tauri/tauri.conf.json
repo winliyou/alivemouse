@@ -12,7 +12,8 @@
   "tauri": {
     "systemTray": {
       "iconPath": "icons/32x32.png",
-      "title": "alive_mouse"
+      "title": "alive_mouse",
+      "menuOnLeftClick": false
     },
     "allowlist": {
       "all": true
