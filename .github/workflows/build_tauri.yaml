@@ -27,7 +27,7 @@ jobs:
       run: pnpm update
 
     - name: Build Tauri App
-      run: pnpm run build && pnpm run tauri -- build
+      run: pnpm tauri -- build
 
     - name: Create Release
       id: create_release
