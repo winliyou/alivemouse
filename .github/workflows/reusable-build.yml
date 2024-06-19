@@ -1,39 +1,20 @@
-name: Build and Release
+name: Reusable Build Workflow
 
-on:
-  push:
-    tags:
-      - 'v*'
+on: workflow_call
 
 jobs:
-  create-release:
-    runs-on: macos-latest
-    steps:
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
-          draft: false
-          prerelease: false
-
-  build-and-release:
-    runs-on: ${{ matrix.os }}
-    needs: create-release 
+  build-and-upload:
+    runs-on: ${{ inputs.os }}
     strategy:
       matrix:
-        os: [windows-latest, macos-latest, ubuntu-latest]
-
+        node-version: [20]
     steps:
     - uses: actions/checkout@v4
 
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: 20
+        node-version: ${{ matrix.node-version }}
 
     - name: Install Dependencies for Ubuntu
       if: runner.os == 'Linux'
@@ -58,9 +39,9 @@ jobs:
             echo "Uploading $file"
             gh release upload ${{ github.ref_name }} "$file" --clobber
         }
-            
+
     - name: Upload Deb files on Ubuntu
-      if: runner.os == 'Ubuntu'
+      if: runner.os == 'Linux'
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
@@ -68,7 +49,7 @@ jobs:
             echo "Uploading $file"
             gh release upload ${{ github.ref_name }} "$file" --clobber
         done
-      
+
     - name: Upload dmg files on macOS
       if: runner.os == 'macOS'
       env:
@@ -78,4 +59,3 @@ jobs:
             echo "Uploading $file"
             gh release upload ${{ github.ref_name }} "$file" --clobber
         done
-      

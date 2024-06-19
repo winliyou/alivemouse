@@ -1,0 +1,39 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  create-release:
+    runs-on: macos-latest
+    steps:
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+  build-and-release-linux:
+    uses: ./.github/workflows/reusable-build.yml
+    needs: create-release
+    with:
+      os: ubuntu-latest
+
+  build-and-release-windows:
+    uses: ./.github/workflows/reusable-build.yml
+    needs: create-release
+    with:
+      os: windows-latest
+
+  build-and-release-macos:
+    uses: ./.github/workflows/reusable-build.yml
+    needs: create-release
+    with:
+      os: macos-latest
