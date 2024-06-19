@@ -6,8 +6,23 @@ on:
       - 'v*'
 
 jobs:
+  create-release:
+    runs-on: macos-latest
+    steps:
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+
   build-and-release:
     runs-on: ${{ matrix.os }}
+    needs: create-release 
     strategy:
       matrix:
         os: [windows-latest, macos-latest, ubuntu-latest]
@@ -32,17 +47,6 @@ jobs:
 
     - name: Build Tauri App
       run: pnpm tauri build
-
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
-        draft: false
-        prerelease: false
 
     - name: Upload Install files on Windows
       if: runner.os == 'Windows'
