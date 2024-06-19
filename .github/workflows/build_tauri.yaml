@@ -24,6 +24,10 @@ jobs:
     - name: Install pnpm
       run: npm install -g pnpm
 
+    # - name: Install Dependencies for Ubuntu
+    #   if: runner.os == 'Ubuntu'
+    #   run: apt install -y libgtk-3*-dev libsoup2*-dev libjavascriptcoregtk-*-dev libwebkit2gtk-4*-dev libxdo-dev libayatana-appindicator-dev
+
     - name: Install dependencies
       run: pnpm update
 
@@ -67,7 +71,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        for file in ./src-tauri/target/release/bundle/macOS/*.dmg; do
+        ls -l ./src-tauri/target/release/bundle/macos
+        for file in ./src-tauri/target/release/bundle/macos/*.dmg; do
             echo "Uploading $file"
             gh release upload ${{ github.ref_name }} "$file" --clobber
         done
