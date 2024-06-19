@@ -1,6 +1,12 @@
 name: Reusable Build Workflow
 
-on: workflow_call
+on:
+  workflow_call:
+    inputs:
+      os:
+        description: 'The OS to run on'
+        required: true
+        type: string
 
 jobs:
   build-and-upload:
