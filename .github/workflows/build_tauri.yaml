@@ -20,12 +20,13 @@ jobs:
       with:
         node-version: 20
 
+    - name: Install Dependencies for Ubuntu
+      if: runner.os == 'Linux'
+      run: apt install -y libgtk-3*-dev libsoup2*-dev libjavascriptcoregtk-*-dev libwebkit2gtk-4*-dev libxdo-dev libappindicator3-dev
+
     - name: Install pnpm
       run: npm install -g pnpm
 
-    - name: Install Dependencies for Ubuntu
-      if: runner.os == 'Ubuntu'
-      run: apt install -y libgtk-3*-dev libsoup2*-dev libjavascriptcoregtk-*-dev libwebkit2gtk-4*-dev libxdo-dev libappindicator3-dev
     - name: Install dependencies
       run: pnpm update
 
