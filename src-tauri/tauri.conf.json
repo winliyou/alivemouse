@@ -28,19 +28,22 @@
         "minimizable": true,
         "visible": false,
         "resizable": false,
-        "alwaysOnTop": true
+        "alwaysOnTop": true,
+        "focus": false
       },
       {
         "title": "i'm here!",
         "label": "mouse_position",
         "url": "/FindMouse",
-        "width": 800,
-        "height": 800,
+        "width": 120,
+        "height": 120,
         "visible": false,
         "resizable": false,
         "decorations": false,
         "transparent": true,
-        "alwaysOnTop": true
+        "alwaysOnTop": true,
+        "skipTaskbar": true,
+        "focus": false
       }
     ],
     "security": {

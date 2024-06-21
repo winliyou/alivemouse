@@ -118,6 +118,11 @@ fn setup_find_mouse_stuff(app_handle: AppHandle) {
         .listen("find_mouse_hotkey_change", move |event| {
             let find_mouse_hotkey_change_payload: FindMouseHotKeyChangePayload =
                 serde_json::from_str(event.payload().unwrap()).unwrap();
+            info!(
+                "find mouse hotkey change, from {} to {}",
+                &MY_SETTINGS.lock().unwrap().hotkey,
+                find_mouse_hotkey_change_payload.hotkey
+            );
             let _app_handle = app_handle.clone();
             match _app_handle
                 .global_shortcut_manager()
@@ -254,6 +259,11 @@ fn main() {
             setting_window.listen("move_mouse_interval_change", |event| {
                 let move_mouse_interval_change_payload: MoveMouseIntervalChangePayload =
                     serde_json::from_str(event.payload().unwrap()).unwrap();
+                info!(
+                    "move interval change, from {} to {}",
+                    MY_SETTINGS.lock().unwrap().interval,
+                    move_mouse_interval_change_payload.interval
+                );
                 MY_SETTINGS.lock().unwrap().interval = move_mouse_interval_change_payload.interval;
             });
         }
