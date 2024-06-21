@@ -1,9 +1,114 @@
 'use client';
-import { useState } from 'react';
+import { KeyboardEvent, useEffect, useState } from 'react';
 import React from 'react';
 import { emit } from '@tauri-apps/api/event';
+import { Container, TextField, Grid, Typography, styled } from '@mui/material';
 
-const App = () => {
+
+function getValidKey(key) {
+  // 使用正则表达式检查key是否匹配
+  if (/^[a-z]$/i.test(key)) {
+    return key.toUpperCase();
+  } else if (/^Key[A-Z]$/.test(key)) {
+    return key.slice(3);
+  } else if (/^Digit[0-9]$/.test(key)) {
+    return key.slice(5);
+  } else {
+    return null;
+  }
+}
+
+function ShortcutKeyInput(props: { initialValue: string, onSave: (value: string) => void }) {
+  const [value, setValue] = useState(props.initialValue);
+  const [error, setError] = useState(false);
+  const [ctrlPressed, setCtrlPressed] = useState(false);
+  const [shiftPressed, setShiftPressed] = useState(false);
+  const [altPressed, setAltPressed] = useState(false);
+  const [normalkey, setNormalkey] = useState("");
+
+  useEffect(() => {
+    setValue(props.initialValue);
+  }, [props.initialValue]);
+
+  const handleKeyDown = (event: KeyboardEvent) => {
+    let ctrlPressed_ = ctrlPressed;
+    let shiftPressed_ = shiftPressed;
+    let altPressed_ = altPressed;
+    if (event.key === "Control") {
+      setCtrlPressed(true);
+      ctrlPressed_ = true;
+    }
+    if (event.key === "Shift") {
+      setShiftPressed(true);
+      shiftPressed_ = true;
+    }
+    if (event.key === "Alt") {
+      setAltPressed(true);
+      altPressed_ = true;
+    }
+    console.log(
+      `ctrlpressed_: ${ctrlPressed_} , altPressed_: ${altPressed_}, shiftPressed_: ${shiftPressed_},
+      ctrlpressed: ${ctrlPressed} , altPressed: ${altPressed}, shiftPressed: ${shiftPressed}`,
+    );
+    let newValue = "";
+    if (ctrlPressed_) newValue += newValue ? "+ctrl" : "ctrl";
+    if (shiftPressed_) newValue += newValue ? "+shift" : "shift";
+    if (altPressed_) newValue += newValue ? "+alt" : "alt";
+    if (
+      event.key !== "Control" &&
+      event.key !== "Shift" &&
+      event.key !== "Alt"
+    ) {
+      console.log("code: ", event.code);
+      let normalKey = getValidKey(event.code);
+      if (normalKey != null) {
+        newValue += newValue ? `+${normalKey}` : normalKey;
+      }
+    }
+    setValue(newValue);
+  };
+
+  const handleKeyUp = (event: KeyboardEvent) => {
+    if (event.key === "Control") {
+      setCtrlPressed(false);
+    }
+    if (event.key === "Shift") {
+      setShiftPressed(false);
+    }
+    if (event.key === "Alt") {
+      setAltPressed(false);
+    }
+  };
+
+  const handleBlur = () => {
+    const isValidShortcut = /^((ctrl|alt|shift)\+)*[a-z0-9]$/i.test(value);
+    if (isValidShortcut) {
+      setError(false);
+      if (props.onSave) {
+        props.onSave(value);
+      }
+    } else {
+      setValue("");
+      setError(true);
+    }
+  };
+
+  return (
+    <TextField
+      error={error}
+      id="outlined-error-helper-text"
+      label="快捷键"
+      value={value}
+      onKeyDown={handleKeyDown}
+      onKeyUp={handleKeyUp}
+      onBlur={handleBlur}
+      helperText={error ? "无效的快捷键" : ""}
+      variant="outlined"
+    />
+  );
+}
+
+export default () => {
 
   const [mouseMoveInterval, setMouseMoveInterval] = useState(10);
   const [hotkey, setHotKey] = useState('Ctrl+Alt+P');
@@ -13,27 +118,39 @@ const App = () => {
     emit('move_mouse_interval_change', { interval: mouseMoveInterval });
     emit('find_mouse_hotkey_change', { hotkey: hotkey });
   };
-
-
   return (
-    <div>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>
-            移动鼠标时间间隔:
-            <input type="number" value={mouseMoveInterval} onChange={e => setMouseMoveInterval(parseInt(e.target.value))} min="1" />
-          </label>
-        </div>
-        <div>
-          <label>
-            显示鼠标位置的快捷键
-            <input type="text" value={hotkey} onChange={e => setHotKey(e.target.value)} />
-          </label>
-        </div>
-        <button type="submit">保存</button>
-      </form>
-    </div>
+    <Container maxWidth="md" style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <Grid container spacing={3}>
+        <Grid item xs={12}>
+          <Typography variant="h4" component="h1" gutterBottom>
+            设置
+          </Typography>
+        </Grid>
+        <Grid item xs={12}>
+          <TextField
+            fullWidth
+            label="闲置时间(s)"
+            value={`${mouseMoveInterval}`}
+            type="number"
+            InputLabelProps={{
+              shrink: true,
+            }}
+            variant="outlined"
+            onBlur={(e) => {
+              emit('move_mouse_interval_change', { interval: mouseMoveInterval });
+            }}
+            onChange={(e) => {
+              setMouseMoveInterval(parseInt(e.target.value));
+            }}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <ShortcutKeyInput initialValue={hotkey} onSave={(value: string) => {
+            setHotKey(value);
+            emit('find_mouse_hotkey_change', { hotkey: value });
+          }} />
+        </Grid>
+      </Grid>
+    </Container>
   );
-};
-
-export default App;
+}
