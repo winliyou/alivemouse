@@ -5,7 +5,7 @@ import { emit } from '@tauri-apps/api/event';
 import { Container, TextField, Grid, Typography, styled } from '@mui/material';
 
 
-function getValidKey(key) {
+function getValidKey(key: string) {
   // 使用正则表达式检查key是否匹配
   if (/^[a-z]$/i.test(key)) {
     return key.toUpperCase();
