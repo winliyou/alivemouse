@@ -7,6 +7,7 @@ use log::info;
 
 use enigo::{Coordinate, Enigo, Mouse, Settings};
 use lazy_static::lazy_static;
+use serde::{Deserialize, Serialize};
 use std::{
     sync::{Arc, Mutex},
     time::Instant,
@@ -15,9 +16,12 @@ use tauri::{
     AppHandle, CustomMenuItem, GlobalShortcutManager, GlobalWindowEvent, LogicalPosition,
     LogicalSize, Manager, RunEvent, Runtime, SystemTray, SystemTrayEvent, SystemTrayMenu,
 };
+#[derive(Serialize, Deserialize)]
 struct MySettings {
     interval: u64,
+    #[serde(skip)]
     should_running: bool,
+    #[serde(skip)]
     last_time_move_mouse: Option<Instant>,
     hotkey: String,
 }
@@ -96,6 +100,9 @@ fn handle_tray_event(app: &AppHandle<impl Runtime>, event: SystemTrayEvent) {
         }
         SystemTrayEvent::MenuItemClick { id, .. } => match id.as_str() {
             "Quit" => {
+                // serialize settings to file along with application binary
+                let setting_content = serde_json::to_string(&*MY_SETTINGS.lock().unwrap()).unwrap();
+                std::fs::write("settings.json", setting_content).unwrap();
                 app.exit(0);
             }
             _ => {}
@@ -207,8 +214,18 @@ fn handle_global_shortcut_find_mouse(_app_handle: &AppHandle) {
 
 fn main() {
     env_logger::init();
+    // deserial settings from file
+    if let Ok(content) = std::fs::read_to_string("settings.json") {
+        let settings: MySettings = serde_json::from_str(&content).unwrap();
+        info!("settings, interval: {}, hotkey: {}", settings.interval, settings.hotkey);
+        *MY_SETTINGS.lock().unwrap() = settings;
+    }
 
     let app = tauri::Builder::default()
+        .invoke_handler(tauri::generate_handler![
+            get_move_mouse_interval,
+            get_find_mouse_hotkey
+        ])
         .system_tray(
             SystemTray::new()
                 .with_tooltip("click to show settings or hide")
@@ -269,4 +286,14 @@ fn main() {
         }
         _ => {}
     })
+}
+
+#[tauri::command]
+fn get_move_mouse_interval() -> u64 {
+    MY_SETTINGS.lock().unwrap().interval
+}
+
+#[tauri::command]
+fn get_find_mouse_hotkey() -> String {
+    MY_SETTINGS.lock().unwrap().hotkey.clone()
 }

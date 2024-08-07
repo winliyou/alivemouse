@@ -1,8 +1,9 @@
 'use client';
-import { KeyboardEvent, useEffect, useState } from 'react';
+import { KeyboardEvent, use, useEffect, useState } from 'react';
 import React from 'react';
 import { emit } from '@tauri-apps/api/event';
-import { Container, TextField, Grid, Typography, styled } from '@mui/material';
+import { invoke } from '@tauri-apps/api/tauri';
+import { Container, TextField, Grid, Typography, styled, Link } from '@mui/material';
 
 
 function getValidKey(key: string) {
@@ -10,7 +11,7 @@ function getValidKey(key: string) {
   if (/^[a-z]$/i.test(key)) {
     return key.toUpperCase();
   } else if (/^Key[A-Z]$/.test(key)) {
-    return key.slice(3);
+    return key.slice(3).toUpperCase();
   } else if (/^Digit[0-9]$/.test(key)) {
     return key.slice(5);
   } else {
@@ -51,9 +52,9 @@ function ShortcutKeyInput(props: { initialValue: string, onSave: (value: string)
       ctrlpressed: ${ctrlPressed} , altPressed: ${altPressed}, shiftPressed: ${shiftPressed}`,
     );
     let newValue = "";
-    if (ctrlPressed_) newValue += newValue ? "+ctrl" : "ctrl";
-    if (shiftPressed_) newValue += newValue ? "+shift" : "shift";
-    if (altPressed_) newValue += newValue ? "+alt" : "alt";
+    if (ctrlPressed_) newValue += newValue ? "+Ctrl" : "Ctrl";
+    if (shiftPressed_) newValue += newValue ? "+Shift" : "Shift";
+    if (altPressed_) newValue += newValue ? "+Alt" : "Alt";
     if (
       event.key !== "Control" &&
       event.key !== "Shift" &&
@@ -109,9 +110,16 @@ function ShortcutKeyInput(props: { initialValue: string, onSave: (value: string)
 }
 
 export default () => {
-
-  const [mouseMoveInterval, setMouseMoveInterval] = useState(10);
-  const [hotkey, setHotKey] = useState('Ctrl+Alt+P');
+  const [mouseMoveInterval, setMouseMoveInterval] = useState<number>(5);
+  const [hotkey, setHotKey] = useState<string>("ctrl+alt+p");
+  useEffect(() => {
+    (async () => {
+      const default_mouse_move_interval = await invoke('get_move_mouse_interval');
+      const default_hotkey = await invoke('get_find_mouse_hotkey');
+      setMouseMoveInterval(default_mouse_move_interval as number);
+      setHotKey(default_hotkey as string);
+    })();
+  }, []);
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
