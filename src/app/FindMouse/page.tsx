@@ -5,17 +5,21 @@ import { listen } from "@tauri-apps/api/event";
 import styles from "./FindMouse.module.css"; // 引入 CSS 模块
 
 const FindMouse = () => {
+  type FindMousePayload = {
+    indicator_x: number;
+    indicator_y: number;
+    window_width: number;
+    window_height: number;
+  };
   const animationRef = useRef<HTMLDivElement>(null);
+  const [findmousePayload, setFindMousePayload] = useState<FindMousePayload>({
+    indicator_x: 0,
+    indicator_y: 0,
+    window_width: 0,
+    window_height: 0,
+  });
 
   useEffect(() => {
-    let element: any | HTMLDivElement = animationRef.current;
-    while (element) {
-      element.style.background = "transparent";
-      element.style.overflow = "hidden";
-      element.style.pointer_events = "none";
-      element = element.parentElement;
-    }
-
     let animationId = 0;
     let findMouseTimeoutId: number | any = 0;
 
@@ -53,8 +57,14 @@ const FindMouse = () => {
       }
     };
 
-    listen("find_mouse", () => {
+    listen("find_mouse", (event: { payload: FindMousePayload }) => {
       // 如果之前的隐藏鼠标位置提示的超时回调还没有调用就清除掉，新建一个重新计时
+      setFindMousePayload({
+        indicator_x: event.payload.indicator_x,
+        indicator_y: event.payload.indicator_y,
+        window_width: event.payload.window_width,
+        window_height: event.payload.window_height,
+      });
       if (findMouseTimeoutId) {
         clearTimeout(findMouseTimeoutId);
       }
@@ -75,7 +85,41 @@ const FindMouse = () => {
 
   return (
     <>
-      <div ref={animationRef} className={styles.circle} />
+      <style jsx global>{`
+        body {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+      `}</style>
+      <div
+        className={styles.findmouse_background}
+        style={{
+          width: findmousePayload.window_width,
+          height: findmousePayload.window_height,
+        }}
+      >
+        <div
+          style={{
+            left: findmousePayload.indicator_x,
+            top: findmousePayload.indicator_y,
+          }}>
+        </div>
+        <div
+          ref={animationRef}
+          className={styles.circle}
+          style={{
+            left: findmousePayload.indicator_x,
+            top: findmousePayload.indicator_y,
+          }}
+        />
+        {`x: ${findmousePayload.indicator_x} y: ${findmousePayload.indicator_y}`}
+      </div>
     </>
   );
 };

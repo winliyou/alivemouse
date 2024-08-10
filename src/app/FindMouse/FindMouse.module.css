@@ -1,13 +1,31 @@
-.circle {
+.circle_bk {
     position: absolute;
-    top: 50%;
-    left: 50%;
     width: 120px;
     height: 120px;
     border: solid 5px #000;
-    background: transparent;
+    opacity: 1.0;
+    background: gray;
     border-radius: 100%;
     transform: translate(-50%, -50%);
     overflow: hidden;
     pointer-events: none;
+}
+
+.circle {
+    position: absolute;
+    z-index: 1000;
+    width: 120px;
+    height: 120px;
+    border: solid 5px #000;
+    opacity: 1.0;
+    background: black;
+    border-radius: 100%;
+    transform: translate(-50%, -50%);
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.findmouse_background {
+    background-color: rgba(243, 236, 247, 0.919);
+    opacity: 0.1;
 }

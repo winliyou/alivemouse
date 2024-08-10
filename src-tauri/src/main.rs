@@ -13,8 +13,8 @@ use std::{
     time::Instant,
 };
 use tauri::{
-    AppHandle, CustomMenuItem, GlobalShortcutManager, GlobalWindowEvent, LogicalPosition,
-    LogicalSize, Manager, RunEvent, Runtime, SystemTray, SystemTrayEvent, SystemTrayMenu,
+    AppHandle, CustomMenuItem, GlobalShortcutManager, GlobalWindowEvent, LogicalPosition, Manager,
+    RunEvent, Runtime, SystemTray, SystemTrayEvent, SystemTrayMenu,
 };
 #[derive(Serialize, Deserialize)]
 struct MySettings {
@@ -172,17 +172,19 @@ fn setup_find_mouse_stuff(app_handle: AppHandle) {
 }
 
 fn handle_global_shortcut_find_mouse(_app_handle: &AppHandle) {
+    #[derive(Serialize, Deserialize, Clone)]
+    struct FindMousePayload {
+        indicator_x: i32,
+        indicator_y: i32,
+        window_width: i32,
+        window_height: i32,
+    }
     info!("find mouse triggered");
     let enigo = Enigo::new(&Settings::default()).unwrap();
     let window = _app_handle.get_window("mouse_position").unwrap();
     let mouse_position = enigo.location().unwrap();
     info!("mouse position: {:?}", mouse_position);
     let monitors = window.available_monitors().unwrap();
-    let window_size_physical = window.outer_size().unwrap();
-    let mut window_size_logic = LogicalSize {
-        width: window_size_physical.width,
-        height: window_size_physical.height,
-    };
     for mon in monitors {
         info!("monitor: {:?}", mon);
         let real_mon_pos = mon.position().to_logical::<i32>(mon.scale_factor());
@@ -192,24 +194,35 @@ fn handle_global_shortcut_find_mouse(_app_handle: &AppHandle) {
             && mouse_position.1 >= real_mon_pos.y
             && mouse_position.1 <= real_mon_pos.y + real_mon_size.height
         {
-            window_size_logic = window_size_physical.to_logical::<u32>(mon.scale_factor());
-            window.set_size(window_size_logic).unwrap();
+            let outer_position = window.outer_position().unwrap();
+            let inner_position = window.inner_position().unwrap();
+            let offset_x = outer_position.x - inner_position.x;
+            let offset_y = outer_position.y - inner_position.y;
+            let final_window_position = LogicalPosition::<i32> {
+                x: real_mon_pos.x + offset_x,
+                y: real_mon_pos.y + offset_y,
+            };
+
+            window.set_size(real_mon_size).unwrap();
+            window.set_position(final_window_position).unwrap();
+            info!("window current monitor: {:?}", window.current_monitor());
+            if !window.is_visible().unwrap() {
+                window.show().unwrap();
+            }
+            window
+                .emit(
+                    "find_mouse",
+                    FindMousePayload {
+                        indicator_x: mouse_position.0 - real_mon_pos.x,
+                        indicator_y: mouse_position.1 - real_mon_pos.y,
+                        window_width: real_mon_size.width,
+                        window_height: real_mon_size.height,
+                    },
+                )
+                .unwrap();
             break;
         }
     }
-    info!("window_size_physical: {:?}", window_size_physical);
-    info!("window_size_logic: {:?}", window_size_logic);
-    window
-        .set_position(LogicalPosition {
-            x: mouse_position.0 - (window_size_logic.width as i32 / 2),
-            y: mouse_position.1 - (window_size_logic.height as i32 / 2),
-        })
-        .unwrap();
-    info!("window current monitor: {:?}", window.current_monitor());
-    if !window.is_visible().unwrap() {
-        window.show().unwrap();
-    }
-    window.emit("find_mouse", {}).unwrap();
 }
 
 fn main() {
@@ -217,7 +230,10 @@ fn main() {
     // deserial settings from file
     if let Ok(content) = std::fs::read_to_string("settings.json") {
         let settings: MySettings = serde_json::from_str(&content).unwrap();
-        info!("settings, interval: {}, hotkey: {}", settings.interval, settings.hotkey);
+        info!(
+            "settings, interval: {}, hotkey: {}",
+            settings.interval, settings.hotkey
+        );
         *MY_SETTINGS.lock().unwrap() = settings;
     }
 
