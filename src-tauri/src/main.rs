@@ -209,6 +209,56 @@ fn handle_global_shortcut_find_mouse(_app_handle: &AppHandle) {
             if !window.is_visible().unwrap() {
                 window.show().unwrap();
             }
+            #[cfg(target_os = "windows")]
+            {
+                let size = window.outer_size().unwrap();
+                info!("window size: {} x {}", size.width, size.height);
+                // set window transparent and through mouse event
+                unsafe {
+                    let find_mouse_window_hwnd =
+                        window.hwnd().unwrap().0 as *mut winapi::shared::windef::HWND__;
+                    info!("window hwnd: {:?}", find_mouse_window_hwnd);
+
+                    use winapi::shared::minwindef::{BOOL, LPARAM, TRUE};
+                    use winapi::um::winuser::{
+                        EnumChildWindows, GetWindowLongW, SetWindowLongW, SetWindowPos,
+                        GWL_EXSTYLE, HWND_TOPMOST, SWP_FRAMECHANGED, SWP_NOMOVE, SWP_NOSIZE,
+                        SWP_NOZORDER, WS_EX_LAYERED, WS_EX_TRANSPARENT,
+                    };
+
+                    // 枚举find_mouse_window_hwnd的所有子窗口，也设置为transparent,find_mouse_window_hwnd也要设置为transparent
+                    let ex_style = GetWindowLongW(find_mouse_window_hwnd, GWL_EXSTYLE);
+                    if (ex_style & (WS_EX_TRANSPARENT | WS_EX_LAYERED) as i32) == 0 {
+                        SetWindowLongW(
+                            find_mouse_window_hwnd,
+                            GWL_EXSTYLE,
+                            ex_style | (WS_EX_TRANSPARENT | WS_EX_LAYERED) as i32,
+                        );
+                    }
+                    EnumChildWindows(find_mouse_window_hwnd, Some(enum_child_windows_callback), 0);
+
+                    unsafe extern "system" fn enum_child_windows_callback(
+                        hwnd: winapi::shared::windef::HWND,
+                        _: LPARAM,
+                    ) -> BOOL {
+                        let ex_style = GetWindowLongW(hwnd, GWL_EXSTYLE);
+                        if (ex_style & (WS_EX_TRANSPARENT | WS_EX_LAYERED) as i32) == 0 {
+                            SetWindowLongW(hwnd, GWL_EXSTYLE, ex_style | WS_EX_TRANSPARENT as i32);
+                        }
+                        SetWindowPos(
+                            hwnd,
+                            HWND_TOPMOST,
+                            0,
+                            0,
+                            0,
+                            0,
+                            SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED,
+                        );
+                        EnumChildWindows(hwnd, Some(enum_child_windows_callback), 0);
+                        TRUE
+                    }
+                }
+            }
             window
                 .emit(
                     "find_mouse",
